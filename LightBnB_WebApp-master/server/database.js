@@ -31,7 +31,7 @@ const getUserWithEmail = function(email) {
       return user;
     })
     .catch((err) => err.message);
-}
+};
 exports.getUserWithEmail = getUserWithEmail;
 
 /**
@@ -41,19 +41,19 @@ exports.getUserWithEmail = getUserWithEmail;
  */
 const getUserWithId = function(id) {
   return pool
-  .query(`SELECT * FROM users;`, [])
-  .then(res => {
-    let userID = null;
-    for (const userProperty of res.rows) {
-      if (userProperty.id === id) {
-        userID = userProperty;
-        break;
+    .query(`SELECT * FROM users;`, [])
+    .then(res => {
+      let userID = null;
+      for (const userProperty of res.rows) {
+        if (userProperty.id === id) {
+          userID = userProperty;
+          break;
+        }
       }
-    }
-    return userID;
-  })
-  .catch((err) => err.message);
-}
+      return userID;
+    })
+    .catch((err) => err.message);
+};
 
 exports.getUserWithId = getUserWithId;
 
@@ -71,8 +71,8 @@ const addUser =  function(user) {
     VALUES ($1, $2, $3)
     RETURNING *;
     `, [user.name, user.email, user.password])
-    .catch((err) => err.message)
-}
+    .catch((err) => err.message);
+};
 
 exports.addUser = addUser;
 
@@ -85,23 +85,23 @@ exports.addUser = addUser;
  */
 const getAllReservations = function(guest_id, limit = 10) {
   return pool
-  .query(`
-    SELECT reservations.*, properties.*, avg(rating) as average_rating
-    FROM reservations
-    JOIN properties ON reservations.property_id = properties.id
-    JOIN property_reviews ON properties.id = property_reviews.property_id
-    WHERE reservations.guest_id = $1
-    AND end_date < NOW()::DATE
-    GROUP BY properties.id, reservations.id
-    ORDER BY reservations.start_date
-    LIMIT $2;
-    `, [guest_id, limit])
-  .then((res) => {
-    return res.rows;
-  })
-  .catch((err) => {
-    console.log(err.message);
-  });
+    .query(`
+      SELECT reservations.*, properties.*, avg(rating) as average_rating
+      FROM reservations
+      JOIN properties ON reservations.property_id = properties.id
+      JOIN property_reviews ON properties.id = property_reviews.property_id
+      WHERE reservations.guest_id = $1
+      AND end_date < NOW()::DATE
+      GROUP BY properties.id, reservations.id
+      ORDER BY reservations.start_date
+      LIMIT $2;
+      `, [guest_id, limit])
+    .then((res) => {
+      return res.rows;
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
 };
 
 exports.getAllReservations = getAllReservations;
@@ -130,25 +130,25 @@ const getAllProperties = (options, limit = 10) => {
   if (options.city) {
     queryParams.push(`%${options.city}%`);
     queryString += `WHERE city LIKE $${queryParams.length}\n`;
-  }
+  } // returns listings from that city
 
   if (options.owner_id) {
     queryParams.push(options.owner_id);
     queryString += `WHERE owner_id = $${queryParams.length}\n`;
-  } // if an owner_id is passed in, only return properties belonging to that owner.
+  } // if an owner_id is passed in, only return properties belonging to that owner
 
   if (options.minimum_price_per_night && options.maximum_price_per_night) {
     queryParams.push(options.minimum_price_per_night * 100);
     queryString += `AND cost_per_night >= $${queryParams.length}\n`;
     queryParams.push(options.maximum_price_per_night * 100);
     queryString += `AND cost_per_night <= $${queryParams.length}\n`;
-  }
+  } // if a minimum_price_per_night and a maximum_price_per_night, only return properties within that price range
   queryString += `GROUP BY properties.id\n`;
 
   if (options.minimum_rating) {
     queryParams.push(options.minimum_rating);
     queryString += `HAVING avg(rating) >= $${queryParams.length}\n`;
-  }
+  } // if a minimum_rating is passed in, only return properties with a rating equal to or higher than that
   
   // 4
   queryParams.push(limit);
@@ -174,40 +174,42 @@ exports.getAllProperties = getAllProperties;
  */
 const addProperty = function(property) {
   return pool
-  .query (`
-  INSERT INTO properties (
-    owner_id,
-    title,
-    description,
-    thumbnail_photo_url,
-    cover_photo_url,
-    cost_per_night,
-    street,
-    city,
-    province,
-    post_code,
-    country,
-    parking_spaces,
-    number_of_bathrooms,
-    number_of_bedrooms)
-VALUES (
-  '${property.owner_id}',
-  '${property.title}', 
-  '${property.description}', 
-  '${property.thumbnail_photo_url}',
-  '${property.cover_photo_url}', 
-  '${property.cost_per_night}', 
-  '${property.street}',
-  '${property.city}',
-  '${property.province}',
-  '${property.post_code}',
-  '${property.country}',
-  '${property.parking_spaces}',
-  '${property.number_of_bathrooms}',
-  '${property.number_of_bedrooms}')
-  RETURNING *;
-  `)
-  .then(res => { return res.rows})
+    .query(`
+    INSERT INTO properties (
+      owner_id,
+      title,
+      description,
+      thumbnail_photo_url,
+      cover_photo_url,
+      cost_per_night,
+      street,
+      city,
+      province,
+      post_code,
+      country,
+      parking_spaces,
+      number_of_bathrooms,
+      number_of_bedrooms)
+  VALUES (
+    '${property.owner_id}',
+    '${property.title}', 
+    '${property.description}', 
+    '${property.thumbnail_photo_url}',
+    '${property.cover_photo_url}', 
+    '${property.cost_per_night}', 
+    '${property.street}',
+    '${property.city}',
+    '${property.province}',
+    '${property.post_code}',
+    '${property.country}',
+    '${property.parking_spaces}',
+    '${property.number_of_bathrooms}',
+    '${property.number_of_bedrooms}')
+    RETURNING *;
+    `)
+    .then(res => {
+      return res.rows;
+    });
 };
 
 exports.addProperty = addProperty;
