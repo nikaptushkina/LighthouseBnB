@@ -1,4 +1,4 @@
-# LightBnB Project
+# LighthouseBnB Project
 
 LightBnB is a rough clone of airBnB used to work on relational databases through my learning at the LHL web development program.
 
