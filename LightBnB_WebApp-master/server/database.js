@@ -22,9 +22,9 @@ const getUserWithEmail = function(email) {
     .query(`SELECT * FROM users;`, [])
     .then(res => {
       let user = null;
-      for (const userProp of res.rows) {
-        if (userProp.email.toLowerCase() === email.toLowerCase()) {
-          user = userProp;
+      for (const userProperty of res.rows) {
+        if (userProperty.email.toLowerCase() === email.toLowerCase()) {
+          user = userProperty;
           break;
         }
       }
@@ -44,9 +44,9 @@ const getUserWithId = function(id) {
   .query(`SELECT * FROM users;`, [])
   .then(res => {
     let userID = null;
-    for (const userProp of res.rows) {
-      if (userProp.id === id) {
-        userID = userProp;
+    for (const userProperty of res.rows) {
+      if (userProperty.id === id) {
+        userID = userProperty;
         break;
       }
     }
@@ -129,25 +129,25 @@ const getAllProperties = (options, limit = 10) => {
   // 3
   if (options.city) {
     queryParams.push(`%${options.city}%`);
-    queryString += `WHERE city LIKE $${queryParams.length} `;
+    queryString += `WHERE city LIKE $${queryParams.length}\n`;
   }
 
   if (options.owner_id) {
-    queryParams.push(`%${options.owner_id}%`);
-    queryString += `WHERE owner_id = $${queryParams.length}`;
-  }
+    queryParams.push(options.owner_id);
+    queryString += `WHERE owner_id = $${queryParams.length}\n`;
+  } // if an owner_id is passed in, only return properties belonging to that owner.
 
   if (options.minimum_price_per_night && options.maximum_price_per_night) {
-    queryParams.push(parseInt(options.minimum_price_per_night));
-    queryString += `AND cost_per_night >= $${queryParams.length}`;
-    queryParams.push(parseInt(options.maximum_price_per_night));
-    queryString += `AND cost_per_night <= $${queryParams.length}`;
+    queryParams.push(options.minimum_price_per_night * 100);
+    queryString += `AND cost_per_night >= $${queryParams.length}\n`;
+    queryParams.push(options.maximum_price_per_night * 100);
+    queryString += `AND cost_per_night <= $${queryParams.length}\n`;
   }
-  queryString += `GROUP BY properties.id`;
+  queryString += `GROUP BY properties.id\n`;
 
   if (options.minimum_rating) {
-    queryParams.push(`%${options.minimum_rating}%`);
-    queryString += `HAVING AVG(property_reviews.rating) >= $${queryParams.length}`;
+    queryParams.push(options.minimum_rating);
+    queryString += `HAVING avg(rating) >= $${queryParams.length}\n`;
   }
   
   // 4
